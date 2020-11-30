@@ -61,7 +61,7 @@ module Tencent
         {
           'Authorization' => authorization(signature('POST', body)),
           'Content-Type' => 'application/json; charset=utf-8', 'Host' => host,
-          'X-TC-Action' => datus[:Action], 'X-TC-Timestamp' => sign_timestamp.to_s,
+          'X-TC-Action' => datus[:Action], 'X-TC-Timestamp' => sign_timestamp,
           'X-TC-Version' => datus[:Version], 'X-TC-Region' => region
         }.merge!(headers || {})
       end

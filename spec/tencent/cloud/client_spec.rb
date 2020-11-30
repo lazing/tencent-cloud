@@ -6,7 +6,7 @@ RSpec.describe Tencent::Cloud::Client do
     client = described_class.new 'apguanzhou', 'AKIDz8krbsJ5yKBZQpn74WFkmLPx3*******', 'Gu5t9xGARNpq86cd98joQYCN3*******'
     client.switch_to 'cvm', 'cvm.tencentcloudapi.com'
     allow(client).to receive(:sign_date).and_return('2019-02-25')
-    allow(client).to receive(:sign_timestamp).and_return(1_551_113_065)
+    allow(client).to receive(:sign_timestamp).and_return(1_551_113_065.to_s)
     client
   end
 

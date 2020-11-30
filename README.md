@@ -21,9 +21,19 @@ Or install it yourself as:
 ## Usage
 
 ```ruby
-client = Tencent::Cloud::Client.new 'api_key', 'api_secret'
+client = Tencent::Cloud::Client.new 'apguanzhou', 'AKIDz8krbsJ5yKBZQpn74WFkmLPx3*******', 'Gu5t9xGARNpq86cd98joQYCN3*******', SmsSdkAppid: 1234567890
+client.switch_to 'cvm', 'cvm.tencentcloudapi.com' # 切换接口，设定服务和地址
+response_body = client.post(a: 1, b: 2) # 响应报文体解析为Hash
+client.post({a: 1, b: 2}, h1: 1, h2: 2) # 请求参数可以有两个：第一组Hash为报文体，第二组为头部
+
+client.send_sms ['+8613912312345'], 1, ['code'], 'sign' # 实现常用方法包装
 
 ```
+
+### 常用方法
+
+* SMS
+> * send_sms(numbers, template_id, params, sign = nil, **args)
 
 ## Development
 

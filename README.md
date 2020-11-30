@@ -32,8 +32,10 @@ client.send_sms ['+8613912312345'], 1, ['code'], 'sign' # 实现常用方法包�
 
 ### 常用方法
 
-* SMS
-> * send_sms(numbers, template_id, params, sign = nil, **args)
+#### SMS短信服务
+详细内容参考`Tencent::Cloud::Sms` 或 `sms_spec.rb`
+
+1. send_sms(numbers, template_id, params, sign = nil, **args)
 
 ## Development
 

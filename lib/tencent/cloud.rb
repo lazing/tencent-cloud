@@ -1,6 +1,8 @@
+require 'logger'
+
 module Tencent
   module Cloud
-    
+
     def self.logger
       @@logger ||= defined?(Rails) ? Rails.logger : ::Logger.new(STDOUT)
     end

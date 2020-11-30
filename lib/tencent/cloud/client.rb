@@ -26,14 +26,15 @@ module Tencent
       end
 
       def switch_to(service, host)
+        Cloud.logger.debug { {service: service, host: host} }
         @service = service
         @host = host
       end
 
       def connection
-        Faraday.new(url: host) do |conn|
+        Faraday.new(url: "https://#{host}") do |conn|
           conn.request :retry
-          conn.request :url_encoded
+          # conn.request :url_encoded
           conn.response :logger
           conn.response :raise_error
           conn.adapter :net_http
@@ -41,14 +42,28 @@ module Tencent
       end
 
       def post(body = nil, headers = nil)
-        url = "https://#{host}"
+        yield(self) if block_given?
         params = body.is_a?(Hash) ? MultiJson.dump(body) : body
-        res = connection.post(url, params, headers)
+        Cloud.logger.debug { { body: body, headers: headers } }
+        res = connection.post('/', params, public_headers(body, headers))
         json(res.body)
       end
 
       def json(data)
+        return {} unless data && !data.empty?
+
         MultiJson.load data, symbolize_keys: true
+      end
+
+      def public_headers(body, headers)
+        datus = (headers || {}).dup
+        datus.merge!(body) if body.is_a?(Hash)
+        {
+          'Authorization' => authorization(signature('POST', body)),
+          'Content-Type' => 'application/json; charset=utf-8', 'Host' => host,
+          'X-TC-Action' => datus[:Action], 'X-TC-Timestamp' => sign_timestamp.to_s,
+          'X-TC-Version' => datus[:Version], 'X-TC-Region' => region
+        }.merge!(headers || {})
       end
 
       def authorization(signature)
@@ -84,6 +99,7 @@ module Tencent
       end
 
       def hashed_request_payload(request_payload)
+        request_payload = MultiJson.dump(request_payload) if request_payload.is_a?(Hash)
         hash_sha256(request_payload)
       end
 
@@ -102,7 +118,7 @@ module Tencent
         content =
           hmac_sha256(
             secret_signing,
-            string_to_sign(request_method, data)
+            string_to_sign(data)
           )
         hex_encode(content)
       end
@@ -116,7 +132,7 @@ module Tencent
       end
 
       def sign_timestamp
-        sign_time.to_i
+        sign_time.to_i.to_s
       end
 
       def secret_signing

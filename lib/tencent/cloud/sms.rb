@@ -2,11 +2,6 @@ module Tencent
   module Cloud
     module Sms
 
-      def module_post(body = nil, headers = nil)
-        switch_to('sms', 'sms.tencentcloudapi.com')
-        post(body, headers)
-      end
-
       ##
       # Send SMS to client
       #
@@ -20,8 +15,10 @@ module Tencent
         datus.merge!\
           PhoneNumberSet: numbers, TemplateID: template_id,
           Sign: sign, TemplateParamSet: params
-        data.merge!(args) if args
-        module_post(datus)
+        datus.merge!(args) if args
+        post(datus) do
+          switch_to('sms', 'sms.tencentcloudapi.com')
+        end
       end
     end
   end

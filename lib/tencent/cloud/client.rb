@@ -1,8 +1,6 @@
 require 'faraday'
 require 'digest'
 require 'openssl'
-require 'tencent/cloud/sms'
-
 
 module Tencent
   module Cloud
@@ -15,8 +13,6 @@ module Tencent
     # 
     class Client
       attr_reader :host, :service, :secret_id, :secret_key, :region, :options
-
-      include Sms
 
       def initialize(region, secret_id, secret_key, **options)
         @secret_id = secret_id
@@ -47,6 +43,22 @@ module Tencent
         Cloud.logger.debug { { body: body, headers: headers } }
         res = connection.post('/', params, public_headers(body, headers))
         json(res.body)
+      end
+
+      def method_missing(symbol, *args)
+        key = camel_case(symbol.to_s)
+        # pp key, ::Tencent::Cloud.constants, ::Tencent::Cloud.const_defined?(key)
+        super(symbol, *args) unless ::Tencent::Cloud.const_defined?(key)
+
+        Tencent::Cloud.const_get(key).new region, secret_id, secret_key, options
+      end
+
+      def respond_to_missing?(method_name, include_private = false)
+        method_name.to_s.end_with?('_api') || super
+      end
+
+      def camel_case(key)
+        key.split('_').map(&:capitalize).join
       end
 
       def json(data)
@@ -136,7 +148,8 @@ module Tencent
       end
 
       def secret_signing
-        secret_service = hmac_sha256(sign_date, service)
+        secret_date = hmac_sha256('TC3' + secret_key, sign_date) 
+        secret_service = hmac_sha256(secret_date, service)
         hmac_sha256(secret_service, sign_version)
       end
 
@@ -154,7 +167,7 @@ module Tencent
       end
 
       def hmac_sha256(key, data)
-        OpenSSL::HMAC.hexdigest('sha256', key, data)
+        OpenSSL::HMAC.digest('SHA256', key, data)
       end
     end
   end

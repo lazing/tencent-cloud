@@ -1,6 +1,11 @@
 module Tencent
   module Cloud
-    module Sms
+    class SmsApi < Client
+
+      def initialize(*args)
+        super(*args)
+        switch_to('sms', 'sms.tencentcloudapi.com')
+      end
 
       ##
       # Send SMS to client
@@ -11,14 +16,23 @@ module Tencent
       # @param sign [String] optional for china local message
       # @param args [Hash] other api parameters
       def send_sms(numbers, template_id, params, sign = nil, **args)
-        datus = { Action: 'SendSms', Version: '2019-07-11', SmsSdkAppid: options[:SmsSdkAppid] }
-        datus.merge!\
+        headers = { Action: 'SendSms' }.merge(share_headers)
+        datus = {
           PhoneNumberSet: numbers, TemplateID: template_id,
           Sign: sign, TemplateParamSet: params
+        }
         datus.merge!(args) if args
-        post(datus) do
-          switch_to('sms', 'sms.tencentcloudapi.com')
-        end
+        post(datus, headers)
+      end
+
+      def describe_sms_sign_list(list, international)
+        headers = { Action: 'DescribeSmsSignList' }.merge(share_headers)
+        datus = { SignIdSet: list, International: international }
+        post(datus, headers)
+      end
+
+      def share_headers
+        { Version: '2019-07-11', SmsSdkAppid: options[:SmsSdkAppid].to_s }
       end
     end
   end

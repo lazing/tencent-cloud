@@ -14,3 +14,4 @@ module Tencent
 end
 
 require 'tencent/cloud/client'
+require 'tencent/cloud/sms_api'

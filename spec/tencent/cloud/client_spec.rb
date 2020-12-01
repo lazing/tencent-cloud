@@ -10,11 +10,6 @@ RSpec.describe Tencent::Cloud::Client do
     client
   end
 
-  it :secret_signing do
-    expect(subject.secret_signing).to\
-      eq('486d685475fe2688c1de7fb51acd4442ace854c4cc849965910b9ccbb4800762')
-  end
-
   it :string_to_sign do
     hash_co_payload = '5ffe6a04c0664d6b969fab9a13bdab201d63ee709638e2749d62a09ca18d7031'
     result = <<-PAYLOAD
@@ -25,6 +20,16 @@ RSpec.describe Tencent::Cloud::Client do
     PAYLOAD
     expect(subject.string_to_sign(hash_co_payload)).to\
       eq(result.lines.map(&:strip).join("\n"))
+  end
+
+  it :signature do
+    # secret_signing = '486d685475fe2688c1de7fb51acd4442ace854c4cc849965910b9ccbb4800762'
+    string_to_sign = "TC3-HMAC-SHA256\n1551113065\n2019-02-25/cvm/tc3_request\n5ffe6a04c0664d6b969fab9a13bdab201d63ee709638e2749d62a09ca18d7031" 
+   
+    # allow(subject).to receive(:secret_signing).and_return(secret_signing)
+    allow(subject).to receive(:string_to_sign).and_return(string_to_sign)
+    result = '2230eefd229f582d8b1b891af7107b91597240707d778ab3738f756258d7652c'
+    expect(subject.signature('', '')).to eq(result)
   end
 
   it :canonical_headers do
@@ -50,5 +55,9 @@ RSpec.describe Tencent::Cloud::Client do
 
     signature = '2230eefd229f582d8b1b891af7107b91597240707d778ab3738f756258d7652c'
     expect(subject.authorization(signature)).to eq(result)
+  end
+
+  it :method_missing do
+    expect(subject.sms_api).to be_kind_of(Tencent::Cloud::SmsApi)
   end
 end

@@ -32,8 +32,8 @@ client.send_sms ['+8613912312345'], 1, ['code'], 'sign' # 实现常用方法包�
 
 ### 常用方法
 
-* SMS
-> * send_sms(numbers, template_id, params, sign = nil, **args)
+#### SMS
+1. send_sms(numbers, template_id, params, sign = nil, **args)
 
 ## Development
 

@@ -10,6 +10,12 @@ module Tencent
     def self.logger=(logger)
       @@logger = logger
     end
+
+    def self.client
+      return @client = yield(Client) if block_given?
+
+      @client || raise(::Tencent::Cloud::Error, 'initialize client with block first')
+    end
   end
 end
 

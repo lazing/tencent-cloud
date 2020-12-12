@@ -12,7 +12,7 @@ module Tencent
     # > client.post json_text # text or hash, hash will use MultiJson.dump to convert
     # 
     class Client
-      attr_reader :host, :service, :secret_id, :secret_key, :region, :options
+      attr_reader :schema, :host, :service, :secret_id, :secret_key, :region, :options
 
       def initialize(region, secret_id, secret_key, **options)
         @secret_id = secret_id
@@ -21,14 +21,16 @@ module Tencent
         @options = options
       end
 
-      def switch_to(service, host)
-        Cloud.logger.debug { {service: service, host: host} }
+      def switch_to(service, host, schema: 'https')
+        Cloud.logger.debug { { schema: schema, service: service, host: host } }
         @service = service
         @host = host
+        @schema = schema
+        self
       end
 
       def connection
-        Faraday.new(url: "https://#{host}") do |conn|
+        Faraday.new(url: "#{schema}://#{host}") do |conn|
           conn.request :retry
           # conn.request :url_encoded
           conn.response :logger
@@ -50,7 +52,12 @@ module Tencent
         # pp key, ::Tencent::Cloud.constants, ::Tencent::Cloud.const_defined?(key)
         super(symbol, *args) unless ::Tencent::Cloud.const_defined?(key)
 
-        Tencent::Cloud.const_get(key).new region, secret_id, secret_key, options
+        var_name = "@#{symbol}"
+        instance_variable_get(var_name) || begin
+          c = Tencent::Cloud.const_get(key).new region, secret_id, secret_key, options
+          instance_variable_set(var_name, c)
+          c
+        end
       end
 
       def respond_to_missing?(method_name, include_private = false)

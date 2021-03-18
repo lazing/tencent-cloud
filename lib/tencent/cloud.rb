@@ -2,13 +2,14 @@ require 'logger'
 
 module Tencent
   module Cloud
+    class Error < StandardError; end
 
     def self.logger
-      @@logger ||= defined?(Rails) ? Rails.logger : ::Logger.new(STDOUT)
+      @logger ||= defined?(Rails) ? Rails.logger : ::Logger.new(STDOUT)
     end
 
     def self.logger=(logger)
-      @@logger = logger
+      @logger = logger
     end
 
     def self.client

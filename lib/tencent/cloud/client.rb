@@ -147,7 +147,7 @@ module Tencent
       end
 
       def sign_time
-        @sign_time ||= Time.now.getutc
+        Time.now.getutc
       end
 
       def sign_timestamp

@@ -16,5 +16,4 @@ RSpec.describe Tencent::Cloud::SmsApi do
     stub_request(:post, 'https://sms.tencentcloudapi.com/')
     subject.describe_sms_sign_list([123], 0)
   end
-
 end
